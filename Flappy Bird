@@ -1,0 +1,184 @@
+setSize(512, 512);
+
+var timer = 0;
+var TimerText;
+var ScoreText;
+var Position;
+var Pause = false;
+var PCounter = 0;
+var End;
+var rect;
+var rect1;
+var Score = 0;
+var Gameover = false;
+var Collision;
+    var background = new WebImage("https://codehs.com/uploads/67f0653cc229b09cb1a98b3921dce241");
+var bird = new WebImage("https://codehs.com/uploads/22c75274cf79899f5cdd062486700680");
+function start(){
+
+
+background.setSize(512, 512); 
+background.setPosition(getWidth() - 512, getHeight() - 512); 
+add(background); 
+
+
+
+bird.setSize(50, 50); 
+bird.setPosition(getWidth()/3, getHeight()/4); 
+add(bird); 
+
+Obstacle1();
+
+TimerText = new Text("Time: " + timer, "12pt Arial");
+TimerText.setPosition(10, 25);
+TimerText.setColor("black");
+add(TimerText);
+
+Position = new Text("Position: " + bird.getWidth() + ',' + bird.getHeight(), "12pt Arial");
+Position.setPosition(10, 55);
+Position.setColor("black");
+add(Position);
+
+ScoreText = new Text("Score: " + Score, "12pt Arial");
+ScoreText.setPosition(10, 85);
+ScoreText.setColor("black");
+add(ScoreText);
+
+keyDownMethod(Movement);
+StartGame();
+}
+
+function Obstacle1(){
+    if(Pause == false){
+        if(Gameover == false){
+            var y = Randomizer.nextInt(50, 256);
+            rect = new Rectangle(50, 512);
+            rect.setPosition(getWidth(), y - 537);
+            rect.setColor("#528A2C");
+            add(rect);
+            rect1 = new Rectangle(50, 512);
+            rect1.setPosition(getWidth(), y + 75);
+            rect1.setColor("#528A2C");
+            add(rect1);
+        }
+    }
+    
+
+}
+
+function CheckCollision(){
+     if (bird.getX() + bird.getWidth() > rect.getX() && 
+        bird.getX() < rect.getX() + rect.getWidth() && 
+        bird.getY() + bird.getHeight() > rect.getY() && 
+        bird.getY() < rect.getY() + rect.getHeight()) {
+        return true;
+    }
+    if (bird.getX() + bird.getWidth() > rect1.getX() && 
+        bird.getX() < rect1.getX() + rect1.getWidth() && 
+        bird.getY() + bird.getHeight() > rect1.getY() && 
+        bird.getY() < rect1.getY() + rect1.getHeight()) {
+        return true; 
+    }
+    return false;
+}
+
+function Check(){
+    if(CheckCollision()|| bird.getY() > 462 || bird.getY() < 0 ){
+        bird.setPosition(getWidth()/3, getHeight()/4);
+        Gameover = true;
+        End = new Text("You hit an obstacle. Your Score was " + Math.round(Score), "20pt Arial");
+        End.setPosition(0, getHeight()/2);
+        End.setColor("red");
+        add(End);
+    }
+}
+
+function Movement(e){
+    if(Pause == false){
+        if(Gameover == false){
+            if (e.key == "w") {
+                bird.move(0 , -50);
+            }
+            if(e.key == "r"){
+                console.log("You restarted.");
+                remove(End);
+            }
+        }
+    }
+    if(e.key == "p"){
+                PCounter++;
+                if(PCounter % 2 == 1){
+                Pause = true;
+                }   else    {
+                    Pause = false;
+                }
+                console.log("You paused the game.");
+    }
+
+}
+
+function moveObstacles(){
+    if(Pause == false){
+        if(Gameover == false){
+            rect.move(-2.5,0);
+            rect1.move(-2.5,0);
+        }
+    }
+}
+
+function moveBird(){
+    if(Pause == false){
+        if(Gameover == false){
+            bird.move(0,+2.5);
+        }
+    }
+}
+
+function TimerBox(){
+    if(Pause == false){
+        if(Gameover == false){
+            Score++;
+            timer++;
+            TimerText.setText("Time: " + timer);
+        }
+    }
+}
+
+function PositionBox(){
+    Position.setText("Position: " + bird.getX() + ',' + bird.getY());
+}
+
+function ScoreBox(){
+    ScoreText.setText("Score: " + Math.round(Score));
+}
+
+function scoreMultiplier(){
+    if(Pause == false){
+        if(Gameover == false){
+            Score*= 1.125;
+        }
+    }
+}
+
+function rectR(){
+    if(Pause == false){
+        if(Gameover == false){
+            remove(rect);
+            remove(rect1);
+        
+            Obstacle1();
+        }
+    }
+}
+
+function StartGame(){
+    setTimer(moveObstacles, 10);
+    setTimer(moveBird, 10);
+    setTimer(TimerBox, 1000);
+    setTimer(PositionBox, 100);
+    setTimer(Check, 100);
+    setTimer(ScoreBox, 1000);
+    setTimer(scoreMultiplier, 1000);
+   setTimer(rectR, 4000);
+
+}
