@@ -1,0 +1,60 @@
+# Update the lists of available software packages
+sudo apt update
+
+# Upgrade all installed software to the latest versions for security
+sudo apt upgrade -y
+
+
+
+# Download the official setup script from Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+
+# Run the script to install Docker on the Raspberry Pi
+sudo sh get-docker.sh
+
+
+
+# Add your user to the docker group so you don't have to type 'sudo' for every docker command
+sudo usermod -aG docker $USER
+
+# Log out of the Pi to apply the new group permissions
+exit
+
+
+
+# Create a dedicated directory to store the ad blocker files
+mkdir -p ~/server/pihole
+
+# Move into the newly created folder
+cd ~/server/pihole
+
+
+
+# Open a blank text file named docker-compose.yml to write the setup rules
+nano docker-compose.yml
+
+
+
+version: "3"
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"                  # Opens port 53 for TCP DNS traffic
+      - "53:53/udp"                  # Opens port 53 for UDP DNS traffic (main ad-blocking traffic)
+      - "80:80/tcp"                  # Opens port 80 so you can view the web dashboard
+    environment:
+      TZ: 'America/New_York'         # Sets the container to your local timezone
+      FTLCONF_webserver_api_password: 'YOUR_SECURE_PASSWORD' # Sets your dashboard login password
+      FTLCONF_dns_listeningMode: 'ALL' # Allows the Pi-hole to accept traffic from your local network
+    volumes:
+      - './etc-pihole:/etc/pihole'   # Saves your Pi-hole settings and blocklists to the Pi's drive
+      - './etc-dnsmasq.d:/etc/dnsmasq.d' # Saves your local network configurations so they aren't lost
+    restart: unless-stopped          # Tells the container to turn back on automatically if the Pi reboots
+
+
+
+# Tell Docker to download the Pi-hole image and run it in the background
+docker compose up -d
