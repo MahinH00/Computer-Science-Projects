@@ -1,0 +1,67 @@
+# =========================================================================
+# RASPBERRY PI LOCAL INTERNAL NAS SETUP GUIDE
+# =========================================================================
+
+# STEP 1: UPDATE SYSTEM AND INSTALL PACKAGES
+# -------------------------------------------------------------------------
+# Update the local software package lists to find the latest versions
+sudo apt update
+
+# Install the native Samba file-sharing services directly onto the operating system
+sudo apt install samba samba-common-bin -y
+
+
+# STEP 2: CREATE AND PREPARE STORAGE REPOSITORY
+# -------------------------------------------------------------------------
+# Create a dedicated directory inside the internal filesystem to host the network share
+sudo mkdir -p /nas/project_share
+
+# Pass complete ownership of the new storage folder to the standard user account
+sudo chown -R pi:pi /nas/project_share
+
+# Assign read, write, and execute permissions so network clients can manage files
+sudo chmod 777 /nas/project_share
+
+
+# STEP 3: CONFIGURE THE NETWORK SHARE RULES
+# -------------------------------------------------------------------------
+# Open the master Samba configuration file using the built-in nano text editor
+# INSTRUCTIONS: Scroll to the very bottom, paste the configuration block below,
+# then press Ctrl+O, Enter, and Ctrl+X to save and exit.
+sudo nano /etc/samba/smb.conf
+
+# === PASTE THE FOLLOWING BLOCK AT THE VERY END OF THE SMB.CONF FILE ===
+[ProjectNAS]
+   comment = Raspberry Pi Internal Storage NAS Share
+   path = /nas/project_share
+   browseable = yes
+   writable = yes
+   only guest = no
+   create mask = 0777
+   directory mask = 0777
+   public = yes
+# ======================================================================
+
+
+# STEP 4: ACCESS CONTROL AND PROTOCOL ACTIVATION
+# -------------------------------------------------------------------------
+# Create a secure network access password for your user login profile
+sudo smbpasswd -a pi
+
+# Restart the primary Samba file daemon to refresh your configuration settings
+sudo systemctl restart smbd
+
+# Restart the NetBIOS name daemon so the Pi's hostname broadcasts over the subnet
+sudo systemctl restart nmbd
+
+
+# STEP 5: VERIFY LOCAL NETWORK CONFIGURATION
+# -------------------------------------------------------------------------
+# Display the active local IP address of your Pi to use for mobile/desktop mapping
+hostname -I
+
+# =========================================================================
+# CLIENT CONNECTION REFERENCE:
+# Windows File Explorer:  \\mhaque8.local\ProjectNAS   (Or replace with local IP)
+# macOS / Mobile Storage: smb://mhaque8.local/ProjectNAS
+# =========================================================================
