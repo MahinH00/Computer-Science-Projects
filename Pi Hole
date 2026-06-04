@@ -1,3 +1,9 @@
+# =========================================================================
+# RASPBERRY PI PI-HOLE NETWORK AD-BLOCKER DOCKER SETUP GUIDE
+# =========================================================================
+
+# STEP 1: UPDATE SYSTEM PACKAGES
+# -------------------------------------------------------------------------
 # Update the lists of available software packages
 sudo apt update
 
@@ -5,7 +11,8 @@ sudo apt update
 sudo apt upgrade -y
 
 
-
+# STEP 2: INSTALL THE DOCKER ENGINE
+# -------------------------------------------------------------------------
 # Download the official setup script from Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
 
@@ -13,15 +20,18 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
 
-
+# STEP 3: CONFIGURE USER PERMISSIONS
+# -------------------------------------------------------------------------
 # Add your user to the docker group so you don't have to type 'sudo' for every docker command
 sudo usermod -aG docker $USER
 
-# Log out of the Pi to apply the new group permissions
+# INSTRUCTION: Log out of the Pi SSH session to apply the new group permissions, 
+# then log back into the Pi before continuing to Step 4.
 exit
 
 
-
+# STEP 4: PREPARE SERVER DIRECTORIES
+# -------------------------------------------------------------------------
 # Create a dedicated directory to store the ad blocker files
 mkdir -p ~/server/pihole
 
@@ -29,12 +39,14 @@ mkdir -p ~/server/pihole
 cd ~/server/pihole
 
 
-
+# STEP 5: DEFINE THE DOCKER CONTAINER RULES
+# -------------------------------------------------------------------------
 # Open a blank text file named docker-compose.yml to write the setup rules
+# INSTRUCTIONS: Paste the configuration block below, replace 'YOUR_SECURE_PASSWORD' 
+# with your desired password, then press Ctrl+O, Enter, and Ctrl+X to save and exit.
 nano docker-compose.yml
 
-
-
+# === PASTE THE FOLLOWING BLOCK INSIDE THE DOCKER-COMPOSE.YML FILE ===
 version: "3"
 
 services:
@@ -53,8 +65,15 @@ services:
       - './etc-pihole:/etc/pihole'   # Saves your Pi-hole settings and blocklists to the Pi's drive
       - './etc-dnsmasq.d:/etc/dnsmasq.d' # Saves your local network configurations so they aren't lost
     restart: unless-stopped          # Tells the container to turn back on automatically if the Pi reboots
+# ======================================================================
 
 
-
+# STEP 6: DEPLOY THE CONTAINERSTACK
+# -------------------------------------------------------------------------
 # Tell Docker to download the Pi-hole image and run it in the background
 docker compose up -d
+
+# =========================================================================
+# DASHBOARD ACCESS REFERENCE:
+# Web Browser URL: http://mhaque8.local/admin  (Or replace with your local IP)
+# =========================================================================
